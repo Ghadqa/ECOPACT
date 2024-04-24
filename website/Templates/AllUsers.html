@@ -77,12 +77,13 @@
     <a href="/auth/admin/home" class="btn btn-outline-primary home-button">Home</a>
     <div id="user-list">
         {% for user in users_data %}
-            <div class="user-card" onclick="showUserData('{{ user.email }}', '{{ user.username }}','{{ user.password }}', '{{ user.role }}')">
+            <div class="user-card" onclick="showUserData('{{ user.email }}', '{{ user.username }}','{{ user.password }}', '{{ user.role }}','{{ user.lastTL }}')">
                 <div class="user-info">
                     <p><strong>Email:</strong> {{ user.email }}</p>
                     <p><strong>Username:</strong> {{ user.username }}</p>
                     <p><strong>password:</strong> {{ user.password }}</p>
                     <p><strong>Role:</strong> {{ user.role }}</p>
+                    <p><strong>Last Logged In:</strong> {{ user.lastTL }}</p>
                 </div>
             </div>
         {% endfor %}

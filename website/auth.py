@@ -140,7 +140,8 @@ def userComponents():
 @is_admin
 def admin_dashboard():
     
-    users_data = [{'email': user[0], 'username': user[1],'password': user[2], 'role': user[3]} for user in website.models.users()]
+    users_data = [{'email': user[0], 'username': user[1],'password': user[2], 'role': user[3],'lastTL':user[4]  } for user in website.models.users()]
+    
     return render_template("AllUsers.html", users_data=users_data)
 
 
@@ -209,7 +210,7 @@ def plot():
     return render_template('AdminGraphs.html', plots=plots)
 
     
-#--------------------------------------File Functions----------------------------------------------------------------
+#------------------------------------File Functions----------------------------------------------------------------
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
