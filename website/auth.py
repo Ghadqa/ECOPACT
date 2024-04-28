@@ -93,14 +93,71 @@ def login():
 @auth.route("/admin/data", methods=['GET', 'POST'])
 @is_admin
 def admin_data() : 
-     if request.method == 'POST':
-        email = request.form['email']
-        components = request.form['components']
-        date = request.form['date']
-        value = request.form['value']
-        website.models.insert_data(email, components, date, value)
-        flash('Data added successfully!', 'success')  # Flash message
-     return render_template("AdminAddData.html")
+    form = UploadFileForm()
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join('website/static', filename)
+            file.save(file_path)
+            
+            try:
+                db_file = "user_database.db"  # Update with your actual database file path
+                conn = sqlite3.connect(db_file)
+                cursor = conn.cursor()
+                print('Opened database successfully')
+                
+                # Open the saved file for reading in binary mode
+                with open(file_path, 'rb') as my_file:
+                    # Wrap it with BytesIO to make it compatible with pandas
+                    file_wrapper = BytesIO(my_file.read())
+                    # Skip header row
+                    next(file_wrapper)
+                    # Read CSV using pandas
+                    df = pd.read_csv(file_wrapper, delimiter=';|,')
+                    print ("df is open")
+
+                # Handle file
+
+                if not df.empty:
+                    insert_query = "INSERT INTO user_components (id, user_id, component, value, date) VALUES (?, ?, ?, ?, ?)"
+                    print("df not empty")
+            
+                    if 'user_id' in session:
+                        user_id = session.get('user_id')
+                        for _, row in df.iterrows():
+                            print(row)
+                        # Construct the SQL INSERT query
+                  
+                        # Get user ID from current user
+                      
+
+                            data = (row.iloc[0],user_id , row.iloc[2], row.iloc[3], row.iloc[4])
+                        # Execute the INSERT query
+                            cursor.execute(insert_query, data)
+
+                    # Commit changes and close the connection
+                            conn.commit()
+                            print(f'Data uploaded successfully for userid{user_id}')
+                   
+                        conn.close()
+                    return render_template("AdminAddData.html")  # Render a success page
+                else:
+                    return jsonify({'error': 'No data found in the CSV file'}), 400
+           
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+    
+    return render_template("AdminAddData.html", form=form)
+    
      
        
      
