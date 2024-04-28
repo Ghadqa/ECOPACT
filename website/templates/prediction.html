@@ -1,0 +1,110 @@
+<html lang="en">
+<head>
+    <style>
+        /* Style pour le bouton */
+        #showGraphBtn {
+            background-color: #4CAF50; /* Couleur de fond */
+            color: white; /* Couleur du texte */
+            padding: 10px 20px; /* Rembourrage */
+            border: none; /* Pas de bordure */
+            border-radius: 4px; /* Coins arrondis */
+            font-size: 16px; /* Taille de la police */
+            cursor: pointer; /* Curseur de la souris */
+        }
+    
+        /* Au survol, changement de couleur de fond */
+        #showGraphBtn:hover {
+            background-color: #45a049;
+        }
+    
+        /* Au clic, changement de couleur de fond */
+        #showGraphBtn:active {
+            background-color: #3e8e41;
+        }
+    </style>
+    <form method="get" action="/auth/uploads/Prediction/graph" enctype="multipart/form-data">
+       
+        <button id="showGraphBtn">Show Graph</button>
+        
+
+    </form>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecast Evaluation</title>
+    <!-- Link to Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <style>
+        /* Styling for the container */
+        .container {
+            margin-top: 50px;
+            font-family: Arial, sans-serif; /* Change font to Arial or any other desired font */
+        }
+        /* Styling for the table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6; /* Using Bootstrap's light grey color */
+        }
+        th {
+            background-color: #28a745; /* Change to desired header background color (green) */
+            color: #ffffff; /* Change to desired header text color (white) */
+        }
+        /* Add some color to table rows alternately */
+        tbody tr:nth-child(even) {
+            background-color: #e9f6ef; /* Change to desired even row background color (light green) */
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #ffffff; /* Change to desired odd row background color (white) */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <h1>Forecast Evaluation</h1>
+        <h2>Evaluation Metrics</h2>
+        <ul>
+            <li>Root Mean Squared Error (RMSE): {{ rmse }}</li>
+            <li>Mean Absolute Error (MAE): {{ mae }}</li>
+            <li>Bias (Mean Absolute Error): {{ bias }}</li>
+            <li>Correlation Coefficient: {{ correlation_coefficient }}</li>
+        </ul>
+        <!-- Table for predicted values -->
+        <h2>Predicted Values</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>Predicted Value</th>
+                  
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop through predicted values -->
+                {% for i in range(pred|length) %}
+                <tr>
+                    <td>{{ pred.index[i] }}</td>
+                    <td>{{ pred[i] }}</td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Metrics -->
+        
+    </div>
+
+    <!-- jQuery script -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</body>
+</html>

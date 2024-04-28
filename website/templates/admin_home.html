@@ -9,7 +9,9 @@
     <style>
         body {
             padding-top: 50px;
-            background-color: #f8f9fa; /* Set background color */
+            background-color: #c8eebe; /* Set background color */
+            background-size: cover;
+            background-image: url("{{ url_for('static', filename='LAC.png') }}");
             color: #333; /* Set text color */
         }
         .container {
@@ -21,15 +23,50 @@
         .header {
             font-size: 2.5rem; /* Increase font size */
             font-weight: bold; /* Make text bold */
-            color: #007bff; /* Set header text color */
+            color: #57a15d; /* Set header text color */
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Add text shadow */
             margin-bottom: 30px; /* Add bottom margin for spacing */
+        }
+        
+        /* Modifier la couleur des boutons en vert */
+        .btn-success {
+            background-color: #57a15d;
+            border-color: #57a15d;
+        }
+
+        .btn-success:hover {
+            background-color: #478f53;
+            border-color: #478f53;
+        }
+
+        .btn-success:focus,
+        .btn-success.focus {
+            box-shadow: 0 0 0 0.25rem rgba(87, 161, 93, 0.5);
+        }
+
+        .btn-success.disabled,
+        .btn-success:disabled {
+            background-color: #57a15d;
+            border-color: #57a15d;
+        }
+
+        .btn-success:not(:disabled):not(.disabled):active,
+        .btn-success:not(:disabled):not(.disabled).active,
+        .show > .btn-success.dropdown-toggle {
+            background-color: #3d7744;
+            border-color: #3d7744;
+        }
+
+        .btn-success:not(:disabled):not(.disabled):active:focus,
+        .btn-success:not(:disabled):not(.disabled).active:focus,
+        .show > .btn-success.dropdown-toggle:focus {
+            box-shadow: 0 0 0 0.25rem rgba(70, 107, 73, 0.5);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="header">Welcome, Admin!</h1> <!-- Enhanced header -->
+        <h1 class="header">Welcome, ANPE!</h1> <!-- Enhanced header -->
         <div class="row justify-content-center">
             <div class="col-md-4">
                 <a href="{{ url_for('auth.Admin') }}" class="btn btn-success btn-lg btn-block">Add a User</a>

@@ -34,7 +34,7 @@ def authenticate_user(email, password) :
 
 
     # Execute a SELECT query to find a user with the provided email and password
-    cursor.execute("SELECT email,password,role FROM users WHERE email=? AND password=?", (email, password))
+    cursor.execute("SELECT email,password,role,last_login FROM users WHERE email=? AND password=?", (email, password))
 
     # Fetch the first row from the result set
     user = cursor.fetchone()
@@ -47,7 +47,7 @@ def authenticate_user(email, password) :
 def users() :
     conn = sqlite3.connect('user_database.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT  email, username,password, role FROM users")
+    cursor.execute("SELECT  email, username,password, role, last_login FROM users")
     users = cursor.fetchall()
 
     # Close the database connection

@@ -10,6 +10,9 @@ import base64
 import io
 from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+import numpy as np 
 import website.models
 from functools import wraps
 from flask import current_app
@@ -140,7 +143,7 @@ def userComponents():
 @is_admin
 def admin_dashboard():
     
-    users_data = [{'email': user[0], 'username': user[1],'password': user[2], 'role': user[3],'lastTL':user[4]  } for user in website.models.users()]
+    users_data = [{'email': user[0], 'username': user[1],'password': user[2], 'role': user[3],'last_login':user[4]  } for user in website.models.users()]
     
     return render_template("AllUsers.html", users_data=users_data)
 
@@ -178,7 +181,7 @@ def plot():
 
     # Filter data for components 'P', 'NA', 'Ph'
     df_components = {}
-    for component in ['P', 'NA', 'Ph']:
+    for component in ['P', 'NH4', 'Ph']:
         df_component = df[df['Component'] == component]
         df_components[component] = df_component[~df_component.index.duplicated()].resample('M').ffill()
 
@@ -193,7 +196,7 @@ def plot():
         plt.grid(True)
 
         # Format date on x-axis
-        date_form = DateFormatter("%Y-%m-%d")  # Customize the date format as per your preference
+        date_form = DateFormatter("%Y.%m.%d")  # Customize the date format as per your preference
         plt.gca().xaxis.set_major_formatter(date_form)
         plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
 
@@ -266,7 +269,7 @@ def upload_to_db():
                     # Skip header row
                     next(file_wrapper)
                     # Read CSV using pandas
-                    df = pd.read_csv(file_wrapper, delimiter=';')
+                    df = pd.read_csv(file_wrapper, delimiter=';|,')
                     print ("df is open")
 
                 # Handle file
@@ -337,7 +340,7 @@ def user_graph():
 
         # Filter data for components 'P', 'NH', 'Ph'
         df_components = {}
-        for component in ['P', 'NH', 'Ph']:
+        for component in ['P', 'NH4', 'Ph']:
             df_component = df[df['Component'] == component]
             df_components[component] = df_component[~df_component.index.duplicated()].resample('M').ffill()
 
@@ -352,7 +355,7 @@ def user_graph():
             plt.grid(True)
 
             # Format date on x-axis
-            date_form = DateFormatter("%Y-%m-%d")  # Customize the date format as per your preference
+            date_form = DateFormatter("%Y.%m.%d")  # Customize the date format as per your preference
             plt.gca().xaxis.set_major_formatter(date_form)
             plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
 
@@ -367,8 +370,90 @@ def user_graph():
 
         # Render template with plots
         return render_template('userGraphs.html', plots=plots)
-
+from website.prediction import Predictions
+@auth.route("/uploads/Prediction", methods=['POST', 'GET'])
+def user_prediction():
+    if request.method == 'POST':
+        if 'user_id' in session:
+            user_id = session.get('user_id')
             
+            # Assuming website.models.UserComponents returns data in some format
+            user_data = [{'component': component[0], 'value': component[1], 'date': component[2]} for component in website.models.UserComponents(user_id)]
+            
+            if user_data:  # Check if there is valid input data
+                # Convert input data to a DataFrame for ARIMA prediction
+                user_data_df= pd.DataFrame(user_data)
+           
+                model=Predictions()
+                pred=model.predict(user_data_df, steps=1, dynamic=False)
+                
+                # Make predictions using the ARIMA model
+                #prediction = model.predict(input_df)
+                correlation_coefficient = np.corrcoef(pred, user_data_df['value'])[0, 1]
+                bias = np.mean(user_data_df['value'] - pred)
+                mae = mean_absolute_error(user_data_df['value'], pred)
+                mse = mean_squared_error(user_data_df['value'], pred)
+                rmse = np.sqrt(mse)
+                if pred.empty or mae is not  None or bias is  not None or mse is not  None or correlation_coefficient is  not None:
+                    # Render the template with the prediction result
+                    return render_template("prediction.html", pred=pred, rmse=rmse, mae=mae, bias=bias, correlation_coefficient=correlation_coefficient)
+                else:
+                    # Handle the case when no prediction is available
+                    return "No prediction available."
+            else:
+                return "No input data available."
+        else:
+            return "User not logged in."
+
+@auth.route("/uploads/Prediction/graph", methods=['GET'])
+@is_logged_in
+def user_graphpred():
+    if 'user_id' in session:
+        user_id = session.get('user_id')
+
+        components = {
+            'Date': [component[2] for component in website.models.UserComponents(user_id)],
+            'Value': [component[1] for component in website.models.UserComponents(user_id)],
+            'Component': [component[0] for component in website.models.UserComponents(user_id)]
+        }
+        user_data_df = pd.DataFrame(components, columns=['Component', 'Value', 'Date'])
+
+        # Convert 'Date' column to datetime type
+        user_data_df['Date'] = pd.to_datetime(user_data_df['Date'])
+
+        # Filter data for components 'P', 'NH4', 'Ph' and make predictions
+        plots = []
+        for component in ['P', 'NH4', 'Ph']:
+            df_component = user_data_df[user_data_df['Component'] == component]
+            if not df_component.empty:
+                model = Predictions()
+                pred = model.predict(df_component, steps=1, dynamic=False)
+
+                # Plotting
+                plt.figure(figsize=(10, 6))
+                plt.plot(df_component['Date'], df_component['Value'], label='Actual', marker='o', linestyle='-')
+                plt.plot(df_component['Date'], pred, label='Predicted', marker='o', linestyle='-')
+                plt.title(f'Component {component} - Value Over Time')
+                plt.xlabel('Date')
+                plt.ylabel('Value')
+                plt.grid(True)
+
+                # Format date on x-axis
+                date_form = DateFormatter("%d.%m.%Y")
+                plt.gca().xaxis.set_major_formatter(date_form)
+                plt.xticks(rotation=45)
+
+                # Save the plot as a PNG image
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format='png')
+                buffer.seek(0)
+                image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                buffer.close()
+
+                plots.append({'component': component, 'image_base64': image_base64})
+
+        # Render template with plots
+        return render_template('predictgraph.html', plots=plots)
 
             
 

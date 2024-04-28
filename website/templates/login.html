@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* CSS pour le formulaire */
+        body {
+            background-color: #f5f5f5;
+            background-image: url("{{ url_for('static', filename='images.jpg') }}");
+ /* Couleur de fond de la page */
+        }
+
+        .form-container {
+            width: 300px;
+            margin: 0 auto;
+            margin-top: 100px; /* Marge en haut pour centrer verticalement le formulaire */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #4EA685; /* Nouvelle couleur verte */
+            color: #fff; /* Texte en blanc */
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: #fff; /* Texte en blanc */
+        }
+
+        .form-control {
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #57B894; /* Nouvelle couleur verte */
+            border: none; /* Supprimer la bordure */
+        }
+
+        .btn-primary:hover {
+            background-color: #4EA685; /* Couleur verte plus foncée au survol */
+        }
+
+        /* Style pour le message de bienvenue */
+        .welcome-info {
+            background-color: #57B894; /* Nouvelle couleur verte */
+            color: #fff; /* Texte en blanc */
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="container text-center">
+    <!-- Message de bienvenue avec le nouveau style -->
+    <div class="welcome-info">
+        <h1>Welcome to Our Platform</h1>
+        <p>This platform is powered by AI for monitoring water resources in Tunisia.</p>
+        
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="form-container">
+                <h2>Login</h2>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                <form action="/auth/login" method="POST">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (optionnel) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let container = document.getElementById('container');
+
+    toggle = () => {
+        container.classList.toggle('login');
+        c
+    }
+
+    setTimeout(() => {
+        container.classList.add('login');
+    }, 200);
+</script>
+</body>
+</html>

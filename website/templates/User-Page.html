@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar with Buttons</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+        background-size: cover;
+        background-image: url("{{ url_for('static', filename='ecogreen.jpg') }}");
+    }
+
+    button {
+        margin: 10px;
+        padding: 10px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: bold; /* Ajout de la propriété manquante */
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    select {
+        margin-bottom: 20px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    input[type="file"] {
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+  
+<div class="container">
+    <form method="POST" action="/auth/uploads" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Submit</button>
+    </form>
+    <form method="POST" action="/auth/uploads/History" enctype="multipart/form-data">
+       
+        <button type="submit">history</button>
+    </form>
+
+    <p>Choose Component:</p>
+    <select id="component">
+        <option value="sodium">Sodium</option>
+        <option value="phosphate">Phosphate</option>
+        <option value="magnesium">Magnesium</option>
+    </select>
+
+    <form method="POST" action="/auth/uploads/Prediction" enctype="multipart/form-data">
+       
+        <button type="submit">Prediction</button>
+    </form>
+
+    
+
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% endwith %}
+</div>
+
+</body>
+</html>
