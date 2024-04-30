@@ -8,7 +8,7 @@ from flask_wtf.file import FileRequired
 from flask_wtf import FlaskForm
 import base64
 import io
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
@@ -390,7 +390,7 @@ def user_graph():
         df = pd.DataFrame(components)
 
         # Convert 'Date' column to datetime type
-        df['Date'] = pd.to_datetime(df['Date'])
+        df['Date'] = pd.to_datetime(df['Date'],format="%d.%m.%Y")
 
         # Set 'Date' as index
         df.set_index('Date', inplace=True)
@@ -412,7 +412,7 @@ def user_graph():
             plt.grid(True)
 
             # Format date on x-axis
-            date_form = DateFormatter("%Y.%m.%d")  # Customize the date format as per your preference
+            date_form = DateFormatter("%d.%m.%Y")  # Customize the date format as per your preference
             plt.gca().xaxis.set_major_formatter(date_form)
             plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
 
@@ -434,33 +434,29 @@ def user_prediction():
         if 'user_id' in session:
             user_id = session.get('user_id')
             
-            # Assuming website.models.UserComponents returns data in some format
+            # Supposons que website.models.UserComponents retourne des données sous une certaine forme
             user_data = [{'component': component[0], 'value': component[1], 'date': component[2]} for component in website.models.UserComponents(user_id)]
             
-            if user_data:  # Check if there is valid input data
-                # Convert input data to a DataFrame for ARIMA prediction
-                user_data_df= pd.DataFrame(user_data)
+            if user_data:  # Vérifiez s'il y a des données d'entrée valides
+                # Convertir les données d'entrée en DataFrame pour la prédiction ARIMA
+                user_data_df = pd.DataFrame(user_data)
            
-                model=Predictions()
-                pred=model.predict(user_data_df, steps=1, dynamic=False)
+                model = Predictions()
+                pred = model.predict(user_data_df, steps=1, dynamic=False)
                 
-                # Make predictions using the ARIMA model
-                #prediction = model.predict(input_df)
-                correlation_coefficient = np.corrcoef(pred, user_data_df['value'])[0, 1]
-                bias = np.mean(user_data_df['value'] - pred)
-                mae = mean_absolute_error(user_data_df['value'], pred)
-                mse = mean_squared_error(user_data_df['value'], pred)
-                rmse = np.sqrt(mse)
-                if pred.empty or mae is not  None or bias is  not None or mse is not  None or correlation_coefficient is  not None:
-                    # Render the template with the prediction result
-                    return render_template("prediction.html", pred=pred, rmse=rmse, mae=mae, bias=bias, correlation_coefficient=correlation_coefficient)
+                # Faire des prédictions en utilisant le modèle ARIMA
+                
+                if pred is not None:
+                    # Rendre le modèle avec le résultat de la prédiction
+                    return render_template("prediction.html", pred=pred)
                 else:
-                    # Handle the case when no prediction is available
+                    # Gérer le cas où aucune prédiction n'est disponible
                     return "No prediction available."
             else:
                 return "No input data available."
         else:
             return "User not logged in."
+
 
 @auth.route("/uploads/Prediction/graph", methods=['GET'])
 @is_logged_in
@@ -476,12 +472,13 @@ def user_graphpred():
         user_data_df = pd.DataFrame(components, columns=['Component', 'Value', 'Date'])
 
         # Convert 'Date' column to datetime type
-        user_data_df['Date'] = pd.to_datetime(user_data_df['Date'])
+        user_data_df['Date'] = pd.to_datetime(user_data_df['Date'],format="%d.%m.%Y")
 
         # Filter data for components 'P', 'NH4', 'Ph' and make predictions
         plots = []
         for component in ['P', 'NH4', 'Ph']:
             df_component = user_data_df[user_data_df['Component'] == component]
+            
             if not df_component.empty:
                 model = Predictions()
                 pred = model.predict(df_component, steps=1, dynamic=False)
@@ -489,11 +486,12 @@ def user_graphpred():
                 # Plotting
                 plt.figure(figsize=(10, 6))
                 plt.plot(df_component['Date'], df_component['Value'], label='Actual', marker='o', linestyle='-')
-                plt.plot(df_component['Date'], pred, label='Predicted', marker='o', linestyle='-')
+                plt.plot(df_component['Date'][-len (pred):], pred, label='Predicted', marker='o', linestyle='-',)
                 plt.title(f'Component {component} - Value Over Time')
                 plt.xlabel('Date')
                 plt.ylabel('Value')
                 plt.grid(True)
+                plt.legend()
 
                 # Format date on x-axis
                 date_form = DateFormatter("%d.%m.%Y")
