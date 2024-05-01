@@ -282,7 +282,7 @@ print("Coefficient de corrélation entre les valeurs prédites et observées :",
 
 
 import pickle
-filename = 'arima_model.pckl'
+filename = 'arima_model.pkl'
 # Sauvegarde du modèle
 pickle.dump(model,open (filename,'wb'))
 #loaded_model=pickle.load(open(filename,'rb'))
