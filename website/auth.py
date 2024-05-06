@@ -427,7 +427,8 @@ def user_graph():
 
         # Render template with plots
         return render_template('userGraphs.html', plots=plots)
-from website.prediction import Predictions
+
+import pickle
 @auth.route("/uploads/Prediction", methods=['POST', 'GET'])
 def user_prediction():
     if request.method == 'POST':
@@ -440,22 +441,31 @@ def user_prediction():
             if user_data:  # Vérifiez s'il y a des données d'entrée valides
                 # Convertir les données d'entrée en DataFrame pour la prédiction ARIMA
                 user_data_df = pd.DataFrame(user_data)
-           
-                model = Predictions()
-                pred = model.predict(user_data_df, steps=1, dynamic=False)
+                
+                # Charger le modèle ARIMA depuis le fichier
+                model_path = "website/arima_model.pkl"
+                try:
+                    with open(model_path, "rb") as fin:
+                        arima_model = pickle.load(fin)
+                except OSError:
+                    return "Wrong path or model not available"
                 
                 # Faire des prédictions en utilisant le modèle ARIMA
+                try:
+                    arima_model_fit = arima_model.fit()
+                    user_values = user_data_df['value']
+                    pred = arima_model_fit.predict(start=user_values.index[0], end=user_values.index[-1], dynamic=False)
+                except Exception as e:
+                    return f"Error in prediction: {str(e)}"
                 
-                if pred is not None:
-                    # Rendre le modèle avec le résultat de la prédiction
-                    return render_template("prediction.html", pred=pred)
-                else:
-                    # Gérer le cas où aucune prédiction n'est disponible
-                    return "No prediction available."
+                # Rendre le modèle avec le résultat de la prédiction
+                return render_template("prediction.html", pred=pred)
             else:
                 return "No input data available."
         else:
             return "User not logged in."
+    else:
+        return "Invalid request method."
 
 
 @auth.route("/uploads/Prediction/graph", methods=['GET'])
@@ -480,8 +490,20 @@ def user_graphpred():
             df_component = user_data_df[user_data_df['Component'] == component]
             
             if not df_component.empty:
-                model = Predictions()
-                pred = model.predict(df_component, steps=1, dynamic=False)
+                
+                # Charger le modèle ARIMA depuis le fichier
+                model_path = "website/arima_model.pkl"
+                try:
+                    with open(model_path, "rb") as fin:
+                        arima_model = pickle.load(fin)
+                except OSError:
+                    return "Wrong path or model not available"
+                
+                # Faire des prédictions en utilisant le modèle ARIMA
+               
+                arima_model_fit = arima_model.fit()
+                user_values = user_data_df['Value']
+                pred = arima_model_fit.predict(start=user_values.index[0], end=user_values.index[-1], dynamic=False)
 
                 # Plotting
                 plt.figure(figsize=(10, 6))

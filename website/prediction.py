@@ -4,18 +4,18 @@ import pickle
 
 
 class Predictions:
-    def __init__(self, model_path="website/arima_model.pckl") -> None:
+    """def __init__(self, model_path="website/arima_model.pkl") -> None:
         with open(model_path, "rb") as fin:
             try:
                 self.model = pickle.load(fin)
             except OSError:
                 print("Wrong path or model not available")
-                exit(-1)
+                exit(-1)""
         
 
    
 
-    """def predict(self, user_data,steps=1, dynamic=False):
+    "def predict(self, user_data,steps=1, dynamic=False):
         
         Predicts gold prices for next date
         date_format = yyyy.mm.dd
@@ -34,6 +34,13 @@ class Predictions:
         return pred
 """""""""
     def predict(self, user_data, steps=1,dynamic=False):
+        model_path="website/arima_model.pkl"
+        with open(model_path, "rb") as fin:
+            try:
+                self.model = pickle.load(fin)
+            except OSError:
+                print("Wrong path or model not available")
+                exit(-1)
          # Chargez le modèle avant de faire des prédictions
         # Prédire en utilisant le modèle
         tr=self.model.fit()
